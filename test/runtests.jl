@@ -1,6 +1,6 @@
-using ImageUtils
-using Test
+using ImageUtils, ImageCore, OffsetArrays
+using Test, TestImages
 
 @testset "ImageUtils.jl" begin
-    # Write your tests here.
+    include("restrict.jl")
 end
