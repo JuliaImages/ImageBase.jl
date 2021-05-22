@@ -76,9 +76,20 @@ function restrict(A::AbstractArray, region::Dims)
 end
 
 function restrict(A::AbstractArray{T,N}, dim::Integer) where {T,N}
+    require_one_based_indexing(A)
+
+    indsA = axes(A)
+    newinds = ntuple(i->i==dim ? restrict_indices(indsA[dim]) : indsA[i], Val(N))
+    out = Array{restrict_eltype(first(A)), N}(undef, last.(newinds))
+    restrict!(out, A, dim)
+    out
+end
+function restrict(A::OffsetArray{T,N}, dim::Integer) where {T,N}
     indsA = axes(A)
     newinds = map(UnitRange, ntuple(i->i==dim ? restrict_indices(indsA[dim]) : indsA[i], Val(N)))
-    out = similar(Array{restrict_eltype(first(A)), N}, newinds)
+    # This calls OffsetArrays implementation: a type piracy
+    # https://github.com/JuliaArrays/OffsetArrays.jl/issues/87
+    out = similar(A, restrict_eltype(first(A)), newinds)
     restrict!(out, A, dim)
     out
 end
