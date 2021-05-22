@@ -1,4 +1,23 @@
-@testset "restrict" begin   
+@testset "restrict" begin
+    @testset "interfaces" begin
+        A = rand(N0f8, 4, 5, 3)
+
+        Ar = @inferred restrict(A, 1)
+        @test typeof(Ar) <: Array
+        @test size(Ar) == (3, 5, 3)
+
+        Ar = @inferred restrict(A, (1, ))
+        @test typeof(Ar) <: Array
+        @test size(Ar) == (3, 5, 3)
+
+        Ar = @inferred restrict(A, (1, 2, 3))
+        @test typeof(Ar) <: Array
+        @test size(Ar) == (3, 3, 2)
+        @test Ar == restrict(A)
+
+        @test_throws MethodError restrict(A, 1, 2, 3)
+    end
+
     @testset "numerical test" begin
         A = reshape([UInt16(i) for i = 1:60], 4, 5, 3)
         B = restrict(A, (1,2))
@@ -36,9 +55,17 @@
     @testset "OffsetArray" begin
         A = rand(5, 4, 3)
         Ao = OffsetArray(A, (-2,1,0))
-        @test parent(@inferred(restrict(Ao, 1))) == restrict(A, 1)
-        @test parent(@inferred(restrict(Ao, 2))) == restrict(A, 2)
-        @test parent(@inferred(restrict(Ao, (1,2)))) == restrict(A, (1,2))
+
+        for (dims, offsets) in [
+                (1,      (-1, 1, 0)),
+                (2,      (-2, 0, 0)),
+                ((1, 2), (-1, 0, 0))
+            ]
+            Ar = @inferred restrict(Ao, dims)
+            @test typeof(Ar) <: OffsetArray
+            @test Ar.offsets == offsets
+            @test parent(Ar) == restrict(A, dims)
+        end
     end
 
     @testset "FixedPoint overflow" begin
