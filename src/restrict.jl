@@ -96,7 +96,11 @@ end
 _restrict_eltype(::Type{T}) where T = typeof(one(T)/4 + one(T)/2)
 _restrict_eltype(::Type{C}) where C<:Color = __restrict_eltype(RGB{eltype(C)})
 _restrict_eltype(::Type{C}) where C<:Colorant = __restrict_eltype(ARGB{eltype(C)})
-__restrict_eltype(::Type{C}) where C = base_colorant_type(C){promote_type(eltype(C), Float32)}
+function __restrict_eltype(::Type{C}) where C
+    BT = base_colorant_type(C)
+    isconcretetype(BT) && return floattype(BT)
+    BT{_restrict_eltype(eltype(C))}
+end
 
 function restrict!(out::AbstractArray{T,N}, A::AbstractArray, dim) where {T,N}
     if dim > N

@@ -63,5 +63,35 @@
         img = rand(RGBA{N0f8}, 11, 11)
         @test eltype(@inferred(restrict(img))) == RGBA{Float32}
         @test eltype(@inferred(restrict(LabA.(img)))) == ARGB{Float32}
+
+        ori = repeat(distinguishable_colors(10), inner=(1, 10))
+        for T in (
+            RGB, BGR, RGBX, XRGB,
+            ARGB, RGBA,
+            RGB24, ARGB32,
+        )
+            img = T.(ori)
+            out = @inferred restrict(img)
+            if T == RGB24
+                @test eltype(out) == RGB{Float32}
+            elseif T == ARGB32
+                @test eltype(out) == ARGB{Float32}
+            else
+                @test eltype(out) <: T
+            end
+            ref = restrict(ori)
+            @test ref ≈ RGB.(out)
+        end
+        for T in (Gray, AGray, GrayA, Gray24)
+            img = T.(ori)
+            out = @inferred restrict(img)
+            if T == Gray24
+                @test eltype(out) == Gray{Float32}
+            else
+                @test eltype(out) <: T
+            end
+            ref = restrict(Gray.(ori))
+            @test ref ≈ Gray.(out)
+        end
     end
 end
