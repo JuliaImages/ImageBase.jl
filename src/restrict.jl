@@ -69,7 +69,6 @@ In some applications (e.g., image registration), you may find it useful to trim 
 """
 restrict(img::AbstractArray, ::Tuple{}) = img
 
-restrict(A::AbstractArray, region::Vector{Int}) = restrict(A, (region...,))
 restrict(A::AbstractArray) = restrict(A, coords_spatial(A))
 function restrict(A::AbstractArray, region::Dims)
     restrict(restrict(A, region[1]), Base.tail(region))
