@@ -1,8 +1,55 @@
 """
-    restrict(img[, region]) -> imgr
+    restrict(img[, dims]) -> imgr
 
 Reduce the size of `img` by approximately two-fold along the dimensions listed in
-`region`, or all spatial coordinates if `region` is not specified.
+`dims`, or all spatial coordinates if `dims` is not specified.
+
+# Output
+
+The type of output array `imgr` depends on the input type:
+
+- If `img` is not an `OffsetArray`, then output array `imgr` will be a typical `Array` type.
+- If `img` is an `OffsetArray`, then output array `imgr` will also be an `OffsetArray`.
+
+The size of `imgr` is approximately `1/2` of the original size. More specifically:
+
+- if `Nₖ = size(img, k)` is odd, then `size(imgr, k) == (Nₖ+1) ÷ 2`.
+- if `Nₖ = size(img, k)` is even, then `size(imgr, k) == (Nₖ÷2) + 1`.
+
+# Examples
+
+The optional argument `dims` can be a `Tuple` or `Integer`:
+
+```julia
+A = rand(5, 5) # size: (5, 5)
+
+restrict(A) # size: (3, 3)
+
+restrict(A, 1) # size: (3, 5)
+restrict(A, 2) # size: (5, 3)
+
+restrict(A, (1, )) # size: (3, 5)
+restrict(A, (1, 2)) # size: (3, 3)
+```
+
+Unless the input array is 1-based, the origin will be halfed:
+
+```julia
+julia> using ImageUtils, OffsetArrays
+
+julia> Ao = OffsetArray(rand(5, 4), 5, 6);
+
+julia> Ar = restrict(Ao);
+
+julia> axes(Ao)
+(OffsetArrays.IdOffsetRange(values=6:10, indices=6:10), OffsetArrays.IdOffsetRange(values=7:10, indices=7:10))
+
+julia> axes(Ar)
+(OffsetArrays.IdOffsetRange(values=3:5, indices=3:5), OffsetArrays.IdOffsetRange(values=4:6, indices=4:6))
+```
+
+# Extended help
+
 The term `restrict` is taken from the coarsening operation of algebraic multigrid
 methods; it is the adjoint of "prolongation" (which is essentially interpolation).
 `restrict` anti-aliases the image as it goes, so is better than a naive summation
@@ -69,10 +116,9 @@ In some applications (e.g., image registration), you may find it useful to trim 
 """
 restrict(img::AbstractArray, ::Tuple{}) = img
 
-restrict(A::AbstractArray, region::Vector{Int}) = restrict(A, (region...,))
 restrict(A::AbstractArray) = restrict(A, coords_spatial(A))
-function restrict(A::AbstractArray, region::Dims)
-    restrict(restrict(A, region[1]), Base.tail(region))
+function restrict(A::AbstractArray, dims::Dims)
+    restrict(restrict(A, dims[1]), Base.tail(dims))
 end
 
 function restrict(A::AbstractArray{T,N}, dim::Integer) where {T,N}
