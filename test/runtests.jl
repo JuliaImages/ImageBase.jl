@@ -1,7 +1,7 @@
-using ImageUtils, ImageCore, OffsetArrays
+using ImageBase, ImageCore, OffsetArrays
 using Test, TestImages
 
-@testset "ImageUtils.jl" begin
+@testset "ImageBase.jl" begin
     include("restrict.jl")
 
     @info "deprecations are expected"

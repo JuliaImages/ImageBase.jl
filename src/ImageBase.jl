@@ -1,9 +1,11 @@
-module ImageUtils
+module ImageBase
 
 export restrict
 
+using Reexport
+
 using Base.Cartesian: @nloops
-using ImageCore
+@reexport using ImageCore
 using ImageCore.OffsetArrays
 
 include("restrict.jl")

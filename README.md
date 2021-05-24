@@ -1,10 +1,12 @@
-# ImageUtils
+# ImageBase
 
-[![Build Status](https://github.com/JuliaImages/ImageUtils.jl/workflows/CI/badge.svg)](https://github.com/JuliaImages/ImageUtils.jl/actions)
-[![Coverage](https://codecov.io/gh/JuliaImages/ImageUtils.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaImages/ImageUtils.jl)
+[![Build Status](https://github.com/JuliaImages/ImageBase.jl/workflows/CI/badge.svg)](https://github.com/JuliaImages/ImageBase.jl/actions)
+[![Coverage](https://codecov.io/gh/JuliaImages/ImageBase.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaImages/ImageBase.jl)
 
 This is a twin package to [ImageCore] with functions that are used among many of the packages in JuliaImages.
 The main purpose of this package is to reduce unnecessary compilation overhead from external dependencies.
+
+This package reexports [ImageCore] so can be a direct replacement of it.
 
 This package can be seen as an experimental package inside JuliaImages:
 
