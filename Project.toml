@@ -4,6 +4,7 @@ version = "0.1.0"
 
 [deps]
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
 ImageCore = "0.8, 0.9"
