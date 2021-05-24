@@ -35,7 +35,7 @@ restrict(A, (1, 2)) # size: (3, 3)
 Unless the input array is 1-based, the origin will be halfed:
 
 ```julia
-julia> using ImageUtils, OffsetArrays
+julia> using ImageBase, OffsetArrays
 
 julia> Ao = OffsetArray(rand(5, 4), 5, 6);
 

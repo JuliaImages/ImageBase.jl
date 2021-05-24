@@ -1,4 +1,4 @@
-module ImageUtils
+module ImageBase
 
 export restrict
 
