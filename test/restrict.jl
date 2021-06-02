@@ -83,7 +83,7 @@
         @test xr == restrict(x)
         @test xr isa Array
 
-        x = view(x0, Base.IdentityUnitRange(3:5))
+        x = view(x0, IdentityUnitRange(3:5))
         xr = restrict(x)
         @test xr == restrict(collect(x))
         @test xr isa Array
