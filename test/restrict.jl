@@ -51,6 +51,13 @@
                    14.09375    32.875    18.78125;
                    11.0390625  25.59375  14.5546875], dims=3) ≈ B
     end
+
+    @testset "singleton dimension" begin
+        # https://github.com/JuliaImages/ImageTransformations.jl/issues/47
+        @test restrict([1]) == [1.0]
+        @test restrict([0 1 0]) == [0.25 0.25]
+        @test restrict([0, 1, 0], 5) == [0, 1, 0]
+    end
    
     @testset "OffsetArray" begin
         A = rand(5, 4, 3)

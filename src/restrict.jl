@@ -160,7 +160,8 @@ function __restrict_eltype(::Type{C}) where C
 end
 
 function restrict!(out::AbstractArray{T,N}, A::AbstractArray, dim) where {T,N}
-    if dim > N
+    # a no-op for singleton dimension
+    if size(A, dim) == 1 # this includes `dim > N` cases
         return copyto!(out, A)
     end
     indsout, indsA = axes(out), axes(A)
