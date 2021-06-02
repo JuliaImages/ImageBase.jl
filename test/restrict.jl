@@ -75,6 +75,20 @@
         end
     end
 
+    @testset "SubArray" begin
+        x0 = [0, 0, 1, 1, 0, 0]
+        xv = @view x0[1:2:6]
+        x = x0[1:2:6]
+        xr = restrict(xv)
+        @test xr == restrict(x)
+        @test xr isa Array
+
+        x = view(x0, IdentityUnitRange(3:5))
+        xr = restrict(x)
+        @test xr == restrict(collect(x))
+        @test xr isa Array
+    end
+
     @testset "FixedPoint overflow" begin
         # issue https://github.com/JuliaImages/Images.jl/issues/395
         img1 = colorview(RGB, fill(0.9, 3, 5, 5))

@@ -8,8 +8,9 @@ Reduce the size of `img` by approximately two-fold along the dimensions listed i
 
 The type of output array `imgr` depends on the input type:
 
-- If `img` is not an `OffsetArray`, then output array `imgr` will be a typical `Array` type.
 - If `img` is an `OffsetArray`, then output array `imgr` will also be an `OffsetArray`.
+- If `img` is not an `OffsetArray`, then output array `imgr` will be an `Array` type
+  even if it has offset indices.
 
 The size of `imgr` is approximately `1/2` of the original size. More specifically:
 
@@ -122,7 +123,10 @@ function restrict(A::AbstractArray, dims::Dims)
 end
 
 function restrict(A::AbstractArray{T,N}, dim::Integer) where {T,N}
-    require_one_based_indexing(A)
+    if Base.has_offset_axes(A)
+        # For type stability, we cannot return `OffsetArray` in this method
+        A = OffsetArrays.no_offset_view(A)
+    end
 
     indsA = axes(A)
     newinds = ntuple(i->i==dim ? restrict_indices(indsA[dim]) : indsA[i], Val(N))
@@ -133,11 +137,9 @@ end
 function restrict(A::OffsetArray{T,N}, dim::Integer) where {T,N}
     indsA = axes(A)
     newinds = map(UnitRange, ntuple(i->i==dim ? restrict_indices(indsA[dim]) : indsA[i], Val(N)))
-    # This calls OffsetArrays implementation: a type piracy
-    # https://github.com/JuliaArrays/OffsetArrays.jl/issues/87
-    out = similar(A, restrict_eltype(first(A)), newinds)
-    restrict!(out, A, dim)
-    out
+    # By shifting it back to normal array, the internal for loop becomes faster because
+    # it requires less indexing computation
+    OffsetArray(restrict(A.parent, dim), newinds)
 end
 
 function restrict_eltype(A::AbstractArray)
