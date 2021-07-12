@@ -62,7 +62,7 @@ If `l` is the size of `img` along a particular dimension, `restrict` produces an
 array of size `(l+1)÷2` for odd `l`,
 and `l÷2 + 1` for even `l`. See the example below for an explanation.
 
-See also [`imresize`](@ref).
+See also `ImageTransformations.imresize`.
 
 # Example
 
