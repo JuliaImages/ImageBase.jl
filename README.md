@@ -14,4 +14,10 @@ This package can be seen as an experimental package inside JuliaImages:
 2. is very conservative to external dependencies outside JuliaImages unless there is a real need, in which case,
    it may just fit the first case.
 
+Functions provided by this package:
+
+- `restrict` for two-fold image downsample. (Originally from ImageTransformations.jl)
+- finite difference operator `fdiff`/`fdiff!` (Originally from Images.jl)
+
+
 [ImageCore]: https://github.com/JuliaImages/ImageCore.jl

@@ -1,6 +1,15 @@
 module ImageBase
 
-export restrict
+export
+    # two-fold downsampling
+    # originally from ImageTransformations.jl
+    restrict,
+
+    # finite difference on one-dimension
+    # originally from Images.jl
+    fdiff,
+    fdiff!
+
 
 using Reexport
 

@@ -1,215 +1,69 @@
-function forwarddiff(a::AbstractArray{T,N}; dims::Int) where {T,N}
-    require_one_based_indexing(a)
-    1 <= dims <= N || throw(ArgumentError("dimension $dims out of range (1:$N)"))
-
-    d = similar(a)
-    r = axes(a)
-    r0 = ntuple(i -> i == dims ? UnitRange(1, last(r[i]) - 1) : UnitRange(r[i]), N)
-    r1 = ntuple(i -> i == dims ? UnitRange(2, last(r[i])) : UnitRange(r[i]), N)
-
-    d0 = ntuple(i -> i == dims ? UnitRange(last(r[i]), last(r[i])) : UnitRange(r[i]), N)
-    d1 = ntuple(i -> i == dims ? UnitRange(1, 1) : UnitRange(r[i]), N)
-
-    d[r0...] = view(a, r1...) .- view(a, r0...)
-    d[d0...] = view(a, d1...) .- view(a, d0...)
-
-    return d
-end
-
-function backdiff(a::AbstractArray{T,N}; dims::Int) where {T,N}
-    require_one_based_indexing(a)
-    1 <= dims <= N || throw(ArgumentError("dimension $dims out of range (1:$N)"))
-
-    d = similar(a)
-    r = axes(a)
-    r0 = ntuple(i -> i == dims ? UnitRange(1, last(r[i]) - 1) : UnitRange(r[i]), N)
-    r1 = ntuple(i -> i == dims ? UnitRange(2, last(r[i])) : UnitRange(r[i]), N)
-
-    d0 = ntuple(i -> i == dims ? UnitRange(last(r[i]), last(r[i])) : UnitRange(r[i]), N)
-    d1 = ntuple(i -> i == dims ? UnitRange(1, 1) : UnitRange(r[i]), N)
-
-    d[r1...] = view(a, r0...) .- view(a, r1...)
-    d[d1...] = view(a, d0...) .- view(a, d1...)
-
-    return d
-end
-
-function forwarddiff!(d::AbstractArray{T,N}, a::AbstractArray{T,N}; dims::Int) where {T,N}
-    require_one_based_indexing(a)
-    1 <= dims <= N || throw(ArgumentError("dimension $dims out of range (1:$N)"))
-
-    r = axes(a)
-    r0 = ntuple(i -> i == dims ? UnitRange(1, last(r[i]) - 1) : UnitRange(r[i]), N)
-    r1 = ntuple(i -> i == dims ? UnitRange(2, last(r[i])) : UnitRange(r[i]), N)
-
-    d0 = ntuple(i -> i == dims ? UnitRange(last(r[i]), last(r[i])) : UnitRange(r[i]), N)
-    d1 = ntuple(i -> i == dims ? UnitRange(1, 1) : UnitRange(r[i]), N)
-
-    d[r0...] = view(a, r1...) .- view(a, r0...)
-    d[d0...] = view(a, d1...) .- view(a, d0...)
-
-    return d
-end
-
-function backdiff!(d::AbstractArray{T,N}, a::AbstractArray{T,N}; dims::Int) where {T,N}
-    require_one_based_indexing(a)
-    1 <= dims <= N || throw(ArgumentError("dimension $dims out of range (1:$N)"))
-
-    r = axes(a)
-    r0 = ntuple(i -> i == dims ? UnitRange(1, last(r[i]) - 1) : UnitRange(r[i]), N)
-    r1 = ntuple(i -> i == dims ? UnitRange(2, last(r[i])) : UnitRange(r[i]), N)
-
-    d0 = ntuple(i -> i == dims ? UnitRange(last(r[i]), last(r[i])) : UnitRange(r[i]), N)
-    d1 = ntuple(i -> i == dims ? UnitRange(1, 1) : UnitRange(r[i]), N)
-
-    d[r1...] = view(a, r0...) .- view(a, r1...)
-    d[d1...] = view(a, d0...) .- view(a, d1...)
-
-    return d
-end
-
-# Docstrings
-
+# TODO: add keyword `shrink` to give a consistant result on Base
+#       when this is done, then we can propose this change to upstream Base
 """
-    forwarddiff(a::AbstractArray{T,N}; dims::Int) where {T,N}
+    fdiff(v::AbstractVector; rev=false)
+    fdiff(A::AbstractArray; dims::Int, rev=false)
 
-Finite one-dimension forward difference operator on a vector or a multidimensional array `A`. In both cases,
-the dimension to operate on needs to be specified with the `dims` keyword argument.
+A cyclic one-dimension finite difference operator on array `A`. Unlike `Base.diff`, this
+function doesn't shrink the array size.
 
-# Output
-
-The return `Vector` or `Array` maintains the same size as input.
+Take vector as an example, it computes `(A[2]-A[1], A[3]-A[2], ..., A[1]-A[end])`. If `rev==true`,
+then it computes `(A[end]-A[1], A[1]-A[2], A[2]-A[3], ..., A[end-1]-A[end])`.
 
 # Examples
 
-```julia
+```jldoctest; setup=:(using ImageBase: fdiff)
 julia> A = [2 4 8; 3 9 27; 4 16 64]
-3×3 Matrix{Int64}:
+3×3 $(Matrix{Int}):
  2   4   8
  3   9  27
  4  16  64
 
-julia> forwarddiff(A, dims=2)
-3×3 Matrix{Int64}:
+julia> diff(A, dims=2)
+3×2 $(Matrix{Int}):
+  2   4
+  6  18
+ 12  48
+
+julia> fdiff(A, dims=2)
+3×3 $(Matrix{Int}):
   2   4   -6
   6  18  -24
  12  48  -60
 ```
 
-See also [`forwarddiff!`](@ref) for in-place forward difference.
+See also [`fdiff!`](@ref) for the in-place version.
 """
-forwarddiff
-
-"""
-    forwarddiff!(d::AbstractArray{T,N}, a::AbstractArray{T,N}; dims::Int) where {T,N}}
-
-Finite one-dimension forward difference operator on a vector or a multidimensional array `A`. In both cases,
-the dimension to operate on needs to be specified with the `dims` keyword argument.
-
-# Output
-
-`d` will be changed in place. The return `Vector` or `Array` maintains the same size as input.
-
-# Examples
-
-```julia
-julia> A = [2 4 8; 3 9 27; 4 16 64]
-3×3 Matrix{Int64}:
- 2   4   8
- 3   9  27
- 4  16  64
-
-julia> D = similar(A)
-3×3 Matrix{Int64}:
- 140441636044112  140441636135216  140441696235920
- 140441647064848  140441636135296  140441636135456
- 140441636135136  140441636135376  140441636135056
-
-julia> forwarddiff!(D, A, dims=2)
-3×3 Matrix{Int64}:
-  2   4   -6
-  6  18  -24
- 12  48  -60
-
-julia> D
-3×3 Matrix{Int64}:
-  2   4   -6
-  6  18  -24
- 12  48  -60
-```
-
-See also: [`forwarddiff`](@ref)
-"""
-forwarddiff!
+fdiff(A::AbstractArray; kwargs...) = fdiff!(similar(A), A; kwargs...)
 
 """
-    backdiff(a::AbstractArray{T,N}; dims::Int) where {T,N}
+    fdiff!(dst::AbstractArray, src::AbstractArray; dims::Int)
 
-Finite one-dimension backward difference operator on a vector or a multidimensional array `A`. In both cases,
-the dimension to operate on needs to be specified with the `dims` keyword argument.
-
-# Output
-
-The return `Vector` or `Array` maintains the same size as input.
-
-# Examples
-
-```julia
-julia> A = [2 4 8; 3 9 27; 4 16 64]
-3×3 Matrix{Int64}:
- 2   4   8
- 3   9  27
- 4  16  64
-
-julia> backdiff(A, dims=2)
-3×3 Matrix{Int64}:
-  6   -2   -4
- 24   -6  -18
- 60  -12  -48
-```
-
-See also [`backdiff!`](@ref) for in-place backward difference.
+The in-place version of [`ImageBase.fdiff`](@ref)
 """
-backdiff
+function fdiff!(dst::AbstractArray, src::AbstractArray; dims=_fdiff_default_dims(src), rev=false)
+    isnothing(dims) && throw(UndefKeywordError(:dims))
+    axes(dst) == axes(src) || throw(ArgumentError("axes of all input arrays should be equal. Instead they are $(axes(dst)) and $(axes(src))."))
+    N = ndims(src)
+    1 <= dims <= N || throw(ArgumentError("dimension $dims out of range (1:$N)"))
 
-"""
-    backdiff!(d::AbstractArray{T,N}, a::AbstractArray{T,N}; dims::Int) where {T,N}}
+    r = axes(src)
+    r0 = ntuple(i -> i == dims ? UnitRange(first(r[i]), last(r[i]) - 1) : UnitRange(r[i]), N)
+    r1 = ntuple(i -> i == dims ? UnitRange(first(r[i])+1, last(r[i])) : UnitRange(r[i]), N)
 
-Finite one-dimension backward difference operator on a vector or a multidimensional array `A`. In both cases,
-the dimension to operate on needs to be specified with the `dims` keyword argument.
+    d0 = ntuple(i -> i == dims ? UnitRange(last(r[i]), last(r[i])) : UnitRange(r[i]), N)
+    d1 = ntuple(i -> i == dims ? UnitRange(first(r[i]), first(r[i])) : UnitRange(r[i]), N)
 
-# Output
+    if rev
+        dst[r1...] = view(src, r0...) .- view(src, r1...)
+        dst[d1...] = view(src, d0...) .- view(src, d1...)
+    else
+        dst[r0...] = view(src, r1...) .- view(src, r0...)
+        dst[d0...] = view(src, d1...) .- view(src, d0...)
+    end
 
-`d` will be changed in place. The return `Vector` or `Array` maintains the same size as input.
+    return dst
+end
 
-# Examples
-
-```julia
-julia> A = [2 4 8; 3 9 27; 4 16 64]
-3×3 Matrix{Int64}:
- 2   4   8
- 3   9  27
- 4  16  64
-
-julia> D = similar(A)
-3×3 Matrix{Int64}:
- 140103024112336  140103024112336  140103027568240
-               0                0                0
- 140103024361232  140103024361232  140103024361232
-
-julia> backdiff!(D, A, dims=2)
-3×3 Matrix{Int64}:
-  6   -2   -4
- 24   -6  -18
- 60  -12  -48
-
-julia> D
-3×3 Matrix{Int64}:
-  6   -2   -4
- 24   -6  -18
- 60  -12  -48
-```
-
-See also: [`backdiff`](@ref)
-"""
-backdiff!
+_fdiff_default_dims(A) = nothing
+_fdiff_default_dims(A::AbstractVector) = 1
