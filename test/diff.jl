@@ -47,31 +47,34 @@
             @test backdiffy(X) == fdiff(X, dims=1, rev=true, boundary=:zero)
         end
 
-        # check numerical results with base implementation
-        drop_last_slice(X, dims) = collect(StackView(collect(eachslice(X, dims=dims))[1:end-1]..., dims=dims))
-        function drop_last_slice(X::AbstractVector, dims)
-            @assert dims==1
-            X[1:end-1]
-        end
-        drop_first_slice(X, dims) = collect(StackView(collect(eachslice(X, dims=dims))[2:end]..., dims=dims))
-        function drop_first_slice(X::AbstractVector, dims)
-            @assert dims==1
-            X[2:end]
-        end
+        if VERSION >= v"1.1"
+            # dims keyword for diff only exists after Julia 1.1
+            # check numerical results with base implementation
+            drop_last_slice(X, dims) = collect(StackView(collect(eachslice(X, dims=dims))[1:end-1]..., dims=dims))
+            function drop_last_slice(X::AbstractVector, dims)
+                @assert dims==1
+                X[1:end-1]
+            end
+            drop_first_slice(X, dims) = collect(StackView(collect(eachslice(X, dims=dims))[2:end]..., dims=dims))
+            function drop_first_slice(X::AbstractVector, dims)
+                @assert dims==1
+                X[2:end]
+            end
 
-        for N in 1:3
-            sz = ntuple(_->5, N)
-            A = rand(sz...)
-            A_out = similar(A)
-            
-            for dims = 1:N
-                out_base = diff(A; dims=dims)
-                out = fdiff(A; dims=dims)
-                @test out_base == drop_last_slice(out, dims)
+            for N in 1:3
+                sz = ntuple(_->5, N)
+                A = rand(sz...)
+                A_out = similar(A)
+                
+                for dims = 1:N
+                    out_base = diff(A; dims=dims)
+                    out = fdiff(A; dims=dims)
+                    @test out_base == drop_last_slice(out, dims)
 
-                out_base = .-reverse(diff(reverse(A; dims=dims); dims=dims); dims=dims)
-                out = fdiff(A; dims=dims, rev=true)
-                @test out_base == drop_first_slice(out, dims)
+                    out_base = .-reverse(diff(reverse(A; dims=dims); dims=dims); dims=dims)
+                    out = fdiff(A; dims=dims, rev=true)
+                    @test out_base == drop_first_slice(out, dims)
+                end
             end
         end
     end
