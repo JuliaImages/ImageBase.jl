@@ -16,8 +16,8 @@
         a = reshape(collect(1:9), 3, 3)
         b_fd_1 = [1 1 1; 1 1 1; -2 -2 -2]
         b_fd_2 = [3 3 -6; 3 3 -6; 3 3 -6]
-        b_bd_1 = [2 2 2; -1 -1 -1; -1 -1 -1]
-        b_bd_2 = [6 -3 -3; 6 -3 -3; 6 -3 -3]
+        b_bd_1 = [-2 -2 -2; 1 1 1; 1 1 1]
+        b_bd_2 = [-6 3 3; -6 3 3; -6 3 3]
         out = similar(a)
 
         @test fdiff(a, dims = 1) == b_fd_1
@@ -43,8 +43,8 @@
             X = rand(3, 3)
             @test forwarddiffx(X) == fdiff(X, dims=2, boundary=:zero)
             @test forwarddiffy(X) == fdiff(X, dims=1, boundary=:zero)
-            @test backdiffx(X) == .-fdiff(X, dims=2, rev=true, boundary=:zero)
-            @test backdiffy(X) == .-fdiff(X, dims=1, rev=true, boundary=:zero)
+            @test backdiffx(X) == fdiff(X, dims=2, rev=true, boundary=:zero)
+            @test backdiffy(X) == fdiff(X, dims=1, rev=true, boundary=:zero)
         end
 
         # check numerical results with base implementation
@@ -69,7 +69,7 @@
                 out = fdiff(A; dims=dims)
                 @test out_base == drop_last_slice(out, dims)
 
-                out_base = reverse(diff(reverse(A; dims=dims); dims=dims); dims=dims)
+                out_base = .-reverse(diff(reverse(A; dims=dims); dims=dims); dims=dims)
                 out = fdiff(A; dims=dims, rev=true)
                 @test out_base == drop_first_slice(out, dims)
             end

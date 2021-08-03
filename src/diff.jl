@@ -11,7 +11,8 @@ Take vector as an example, it computes `(A[2]-A[1], A[3]-A[2], ..., A[1]-A[end])
 # Keywords
 
 - `rev::Bool`
-  If `rev==true`, then it computes reversely `(A[end]-A[1], A[1]-A[2], ..., A[end-1]-A[end])`.
+  If `rev==true`, then it computes the backward difference
+  `(A[end]-A[1], A[1]-A[2], ..., A[end-1]-A[end])`.
 - `boundary`
   By default it computes periodically in the boundary, i.e., `:periodic`.
   In some cases, one can fill zero values with `boundary=:zero`.
@@ -39,9 +40,9 @@ julia> fdiff(A, dims=2)
 
 julia> fdiff(A, dims=2, rev=true) # reverse diff
 3×3 $(Matrix{Int}):
-  6   -2   -4
- 24   -6  -18
- 60  -12  -48
+  -6   2   4
+ -24   6  18
+ -60  12  48
 
 julia> fdiff(A, dims=2, boundary=:zero) # fill boundary with zeros
 3×3 $(Matrix{Int}):
@@ -62,7 +63,7 @@ The in-place version of [`ImageBase.fdiff`](@ref)
 function fdiff!(dst::AbstractArray, src::AbstractArray;
         dims=_fdiff_default_dims(src),
         rev=false,
-        boundary=:periodic)
+        boundary::Symbol=:periodic)
     isnothing(dims) && throw(UndefKeywordError(:dims))
     axes(dst) == axes(src) || throw(ArgumentError("axes of all input arrays should be equal. Instead they are $(axes(dst)) and $(axes(src))."))
     N = ndims(src)
@@ -76,9 +77,9 @@ function fdiff!(dst::AbstractArray, src::AbstractArray;
     d1 = ntuple(i -> i == dims ? UnitRange(first(r[i]), first(r[i])) : UnitRange(r[i]), N)
 
     if rev
-        dst[r1...] .= view(src, r0...) .- view(src, r1...)
+        dst[r1...] .= view(src, r1...) .- view(src, r0...)
         if boundary == :periodic
-            dst[d1...] .= view(src, d0...) .- view(src, d1...)
+            dst[d1...] .= view(src, d1...) .- view(src, d0...)
         else
             dst[d1...] .= zero(eltype(dst))
         end
