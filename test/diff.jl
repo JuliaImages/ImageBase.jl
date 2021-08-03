@@ -33,6 +33,20 @@
         fdiff!(out, a, dims = 2, rev=true)
         @test out == b_bd_2
 
+        @testset "Boundary" begin
+            # These originally lives in Images and we use it to check the compatibility
+            forwarddiffy(u::AbstractMatrix) = [u[2:end,:]; u[end:end,:]] - u
+            forwarddiffx(u::AbstractMatrix) = [u[:,2:end] u[:,end:end]] - u
+            backdiffy(u::AbstractMatrix) = u - [u[1:1,:]; u[1:end-1,:]]
+            backdiffx(u::AbstractMatrix) = u - [u[:,1:1] u[:,1:end-1]]
+
+            X = rand(3, 3)
+            @test forwarddiffx(X) == fdiff(X, dims=2, boundary=:zero)
+            @test forwarddiffy(X) == fdiff(X, dims=1, boundary=:zero)
+            @test backdiffx(X) == .-fdiff(X, dims=2, rev=true, boundary=:zero)
+            @test backdiffy(X) == .-fdiff(X, dims=1, rev=true, boundary=:zero)
+        end
+
         # check numerical results with base implementation
         drop_last_slice(X, dims) = collect(StackView(collect(eachslice(X, dims=dims))[1:end-1]..., dims=dims))
         function drop_last_slice(X::AbstractVector, dims)

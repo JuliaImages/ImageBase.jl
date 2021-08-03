@@ -1,14 +1,20 @@
 # TODO: add keyword `shrink` to give a consistant result on Base
 #       when this is done, then we can propose this change to upstream Base
 """
-    fdiff(v::AbstractVector; rev=false)
-    fdiff(A::AbstractArray; dims::Int, rev=false)
+    fdiff(A::AbstractArray; dims::Int, rev=false, boundary=:periodic)
 
-A cyclic one-dimension finite difference operator on array `A`. Unlike `Base.diff`, this
-function doesn't shrink the array size.
+A one-dimension finite difference operator on array `A`. Unlike `Base.diff`, this function doesn't
+shrink the array size.
 
-Take vector as an example, it computes `(A[2]-A[1], A[3]-A[2], ..., A[1]-A[end])`. If `rev==true`,
-then it computes `(A[end]-A[1], A[1]-A[2], A[2]-A[3], ..., A[end-1]-A[end])`.
+Take vector as an example, it computes `(A[2]-A[1], A[3]-A[2], ..., A[1]-A[end])`.
+
+# Keywords
+
+- `rev::Bool`
+  If `rev==true`, then it computes reversely `(A[end]-A[1], A[1]-A[2], ..., A[end-1]-A[end])`.
+- `boundary`
+  By default it computes periodically in the boundary, i.e., `:periodic`.
+  In some cases, one can fill zero values with `boundary=:zero`.
 
 # Examples
 
@@ -37,11 +43,14 @@ See also [`fdiff!`](@ref) for the in-place version.
 fdiff(A::AbstractArray; kwargs...) = fdiff!(similar(A), A; kwargs...)
 
 """
-    fdiff!(dst::AbstractArray, src::AbstractArray; dims::Int)
+    fdiff!(dst::AbstractArray, src::AbstractArray; dims::Int, rev=false, boundary=:periodic)
 
 The in-place version of [`ImageBase.fdiff`](@ref)
 """
-function fdiff!(dst::AbstractArray, src::AbstractArray; dims=_fdiff_default_dims(src), rev=false)
+function fdiff!(dst::AbstractArray, src::AbstractArray;
+        dims=_fdiff_default_dims(src),
+        rev=false,
+        boundary=:periodic)
     isnothing(dims) && throw(UndefKeywordError(:dims))
     axes(dst) == axes(src) || throw(ArgumentError("axes of all input arrays should be equal. Instead they are $(axes(dst)) and $(axes(src))."))
     N = ndims(src)
@@ -56,10 +65,18 @@ function fdiff!(dst::AbstractArray, src::AbstractArray; dims=_fdiff_default_dims
 
     if rev
         dst[r1...] .= view(src, r0...) .- view(src, r1...)
-        dst[d1...] .= view(src, d0...) .- view(src, d1...)
+        if boundary == :periodic
+            dst[d1...] .= view(src, d0...) .- view(src, d1...)
+        else
+            dst[d1...] .= zero(eltype(dst))
+        end
     else
         dst[r0...] .= view(src, r1...) .- view(src, r0...)
-        dst[d0...] .= view(src, d1...) .- view(src, d0...)
+        if boundary == :periodic
+            dst[d0...] .= view(src, d1...) .- view(src, d0...)
+        else
+            dst[d0...] .= zero(eltype(dst))
+        end
     end
 
     return dst
