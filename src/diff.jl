@@ -25,7 +25,7 @@ julia> A = [2 4 8; 3 9 27; 4 16 64]
  3   9  27
  4  16  64
 
-julia> diff(A, dims=2)
+julia> diff(A, dims=2) # this function exists in Base
 3×2 $(Matrix{Int}):
   2   4
   6  18
@@ -36,6 +36,18 @@ julia> fdiff(A, dims=2)
   2   4   -6
   6  18  -24
  12  48  -60
+
+julia> fdiff(A, dims=2, rev=true) # reverse diff
+3×3 $(Matrix{Int}):
+  6   -2   -4
+ 24   -6  -18
+ 60  -12  -48
+
+julia> fdiff(A, dims=2, boundary=:zero) # fill boundary with zeros
+3×3 $(Matrix{Int}):
+  2   4  0
+  6  18  0
+ 12  48  0
 ```
 
 See also [`fdiff!`](@ref) for the in-place version.
