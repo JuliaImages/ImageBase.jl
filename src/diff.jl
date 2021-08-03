@@ -55,11 +55,11 @@ function fdiff!(dst::AbstractArray, src::AbstractArray; dims=_fdiff_default_dims
     d1 = ntuple(i -> i == dims ? UnitRange(first(r[i]), first(r[i])) : UnitRange(r[i]), N)
 
     if rev
-        dst[r1...] = view(src, r0...) .- view(src, r1...)
-        dst[d1...] = view(src, d0...) .- view(src, d1...)
+        dst[r1...] .= view(src, r0...) .- view(src, r1...)
+        dst[d1...] .= view(src, d0...) .- view(src, d1...)
     else
-        dst[r0...] = view(src, r1...) .- view(src, r0...)
-        dst[d0...] = view(src, d1...) .- view(src, d0...)
+        dst[r0...] .= view(src, r1...) .- view(src, r0...)
+        dst[d0...] .= view(src, d1...) .- view(src, d0...)
     end
 
     return dst
