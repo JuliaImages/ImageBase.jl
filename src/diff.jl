@@ -80,15 +80,19 @@ function fdiff!(dst::AbstractArray, src::AbstractArray;
         dst[r1...] .= view(src, r1...) .- view(src, r0...)
         if boundary == :periodic
             dst[d1...] .= view(src, d1...) .- view(src, d0...)
-        else
+        elseif boundary == :zero
             dst[d1...] .= zero(eltype(dst))
+        else
+            throw(ArgumentError("Wrong boundary condition $boundary"))
         end
     else
         dst[r0...] .= view(src, r1...) .- view(src, r0...)
         if boundary == :periodic
             dst[d0...] .= view(src, d1...) .- view(src, d0...)
-        else
+        elseif boundary == :zero
             dst[d0...] .= zero(eltype(dst))
+        else
+            throw(ArgumentError("Wrong boundary condition $boundary"))
         end
     end
 
