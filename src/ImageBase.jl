@@ -8,6 +8,7 @@ using Base.Cartesian: @nloops
 @reexport using ImageCore
 using ImageCore.OffsetArrays
 
+include("diff.jl")
 include("restrict.jl")
 include("compat.jl")
 include("deprecated.jl")
