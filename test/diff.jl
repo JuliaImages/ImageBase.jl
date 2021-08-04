@@ -10,6 +10,12 @@
         mat_out = similar(mat_in)
         fdiff!(mat_out, mat_in, dims = 3, rev=true)
         @test mat_out == fdiff(mat_in, dims = 3, rev=true)
+
+        # default `dims` are only available when input is a vector
+        v = rand(9)
+        @test fdiff(v) == fdiff(v; dims=1)
+        m = rand(3, 3)
+        @test_throws UndefKeywordError fdiff(m)
     end
 
     @testset "NumericalTests" begin
