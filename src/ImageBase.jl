@@ -1,6 +1,15 @@
 module ImageBase
 
-export restrict
+export
+    # two-fold downsampling
+    # originally from ImageTransformations.jl
+    restrict,
+
+    # finite difference on one-dimension
+    # originally from Images.jl
+    fdiff,
+    fdiff!
+
 
 using Reexport
 
@@ -8,6 +17,7 @@ using Base.Cartesian: @nloops
 @reexport using ImageCore
 using ImageCore.OffsetArrays
 
+include("diff.jl")
 include("restrict.jl")
 include("compat.jl")
 include("deprecated.jl")
