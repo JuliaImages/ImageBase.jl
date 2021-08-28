@@ -7,8 +7,9 @@ using OffsetArrays: IdentityUnitRange
 
     @testset "Project meta quality checks" begin
         # Not checking compat section for test-only dependencies
+        Aqua.test_ambiguities(ImageBase)
         Aqua.test_all(ImageBase;
-            ambiguities=true,
+            ambiguities=false,
             project_extras=true,
             deps_compat=true,
             stale_deps=true,
