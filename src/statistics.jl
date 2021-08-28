@@ -49,8 +49,18 @@ Compute the mean value of `A`, ignoring any non-finite values.
 
 The supported `kwargs` are those of `sum(f, A; kwargs...)`.
 """
-function meanfinite(A; kwargs...)
-    s = sum(Map12(isfinite, identity, zero), A; kwargs...)
-    n = sum(Map12(isfinite, x->true, x->false), A; kwargs...)   # TODO: replace with `Returns`
-    return s./n
+function meanfinite end
+
+if Base.VERSION >= v"1.1"
+    function meanfinite(A; kwargs...)
+        s = sum(Map12(isfinite, identity, zero), A; kwargs...)
+        n = sum(Map12(isfinite, x->true, x->false), A; kwargs...)   # TODO: replace with `Returns`
+        return s./n
+    end
+else
+    function meanfinite(A; kwargs...)
+        s = sum(Map12(isfinite, identity, zero).(A); kwargs...)
+        n = sum(Map12(isfinite, x->true, x->false).(A); kwargs...)
+        return s./n
+    end
 end
