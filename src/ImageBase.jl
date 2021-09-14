@@ -14,7 +14,8 @@ export
     minfinite,
     maxfinite,
     maxabsfinite,
-    meanfinite
+    meanfinite,
+    varfinite
 
 
 using Reexport

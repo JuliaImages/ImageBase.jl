@@ -11,13 +11,18 @@ using Test
     @test eltype(s12) <: RGB
     A = [NaN, 1, 2, 3]
     @test meanfinite(A, 1) ≈ [2]
+    @test varfinite(A, dims=1) ≈ [1]
     A = [NaN 1 2 3;
          NaN 6 5 4]
     mf = meanfinite(A, 1)
+    vf = varfinite(A, dims=1)
     @test isnan(mf[1])
     @test mf[1,2:end] ≈ [3.5,3.5,3.5]
+    @test vf[1,:] ≈ [0,12.5,4.5,0.5]
     @test meanfinite(A, 2) ≈ reshape([2, 5], 2, 1)
+    @test varfinite(A, dims=2) ≈ reshape([1, 1], 2, 1)
     @test meanfinite(A, (1,2)) ≈ [3.5]
+    @test varfinite(A, dims=(1,2)) ≈ [3.5]
     @test minfinite(A) == 1
     @test maxfinite(A) == 6
     @test maxabsfinite(A) == 6
