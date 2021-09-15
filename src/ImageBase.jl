@@ -26,6 +26,7 @@ using ImageCore.OffsetArrays
 
 include("diff.jl")
 include("restrict.jl")
+include("utils.jl")
 include("statistics.jl")
 include("compat.jl")
 include("deprecated.jl")
