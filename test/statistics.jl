@@ -9,15 +9,31 @@ using Test
     img = colorview(RGB, PermutedDimsArray(A, (3,1,2)))
     s12 = sum(img, dims=(1,2))
     @test eltype(s12) <: RGB
+
     A = [NaN, 1, 2, 3]
-    @test meanfinite(A, 1) ≈ [2]
+    @test meanfinite(A, dims=1) ≈ [2]
+    @test varfinite(A, dims=1) ≈ [1]
+
+    A = [NaN NaN 1;
+        1 2 3]
+    vf = varfinite(A, dims=2)
+    @test isnan(vf[1])
+
     A = [NaN 1 2 3;
          NaN 6 5 4]
-    mf = meanfinite(A, 1)
+    mf = meanfinite(A, dims=1)
+    vf = varfinite(A, dims=1)
     @test isnan(mf[1])
-    @test mf[1,2:end] ≈ [3.5,3.5,3.5]
-    @test meanfinite(A, 2) ≈ reshape([2, 5], 2, 1)
-    @test meanfinite(A, (1,2)) ≈ [3.5]
+    @test mf[2:end] ≈ [3.5,3.5,3.5]
+    @test isnan(vf[1]) 
+    @test vf[2:end] ≈ [12.5,4.5,0.5]
+
+    @test meanfinite(A, dims=2) ≈ reshape([2, 5], 2, 1)
+    @test varfinite(A, dims=2) ≈ reshape([1, 1], 2, 1)
+
+    @test meanfinite(A, dims=(1,2)) ≈ [3.5]
+    @test varfinite(A, dims=(1,2)) ≈ [3.5]
+
     @test minfinite(A) == 1
     @test maxfinite(A) == 6
     @test maxabsfinite(A) == 6
@@ -29,7 +45,7 @@ using Test
     @test maxfinite(A) == maximum(A)
     A = rand(Float32,3,5,5)
     img = colorview(RGB, A)
-    dc = meanfinite(img, 1)-reshape(reinterpretc(RGB{Float32}, mean(A, dims=2)), (1,5))
+    dc = meanfinite(img, dims=1)-reshape(reinterpretc(RGB{Float32}, mean(A, dims=2)), (1,5))
     @test maximum(map(_abs, dc)) < 1e-6
     dc = minfinite(img)-RGB{Float32}(minimum(A, dims=(2,3))...)
     @test _abs(dc) < 1e-6
