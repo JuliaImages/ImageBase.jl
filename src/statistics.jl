@@ -79,14 +79,14 @@ if Base.VERSION >= v"1.1"
         m = meanfinite(A; kwargs...)
         n = sum(Map12(isfinite, x->true, x->false), A; kwargs...)   # TODO: replace with `Returns`
         s = sum(Map12(isfinite, identity, zero), (A .- m).^2; kwargs...)
-        return s ./ (n .- 1)
+        return s ./ max.(0, (n .- 1))
     end
 else
     function varfinite(A; kwargs...)
         m = meanfinite(A; kwargs...)
         n = sum(Map12(isfinite, x->true, x->false).(A); kwargs...) 
         s = sum(Map12(isfinite, identity, zero).((A .- m).^2); kwargs...)
-        return s ./ (n .- 1)
+        return s ./ max.(0, (n .- 1))
     end
 end
     

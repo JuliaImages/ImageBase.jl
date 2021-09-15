@@ -14,13 +14,19 @@ using Test
     @test meanfinite(A, dims=1) ≈ [2]
     @test varfinite(A, dims=1) ≈ [1]
 
+    A = [NaN NaN 1;
+        1 2 3]
+    vf = varfinite(A, dims=2)
+    @test isnan(vf[1])
+
     A = [NaN 1 2 3;
          NaN 6 5 4]
     mf = meanfinite(A, dims=1)
     vf = varfinite(A, dims=1)
     @test isnan(mf[1])
-    @test mf[1,2:end] ≈ [3.5,3.5,3.5]
-    @test vf[1,:] ≈ [0,12.5,4.5,0.5]
+    @test mf[2:end] ≈ [3.5,3.5,3.5]
+    @test isnan(vf[1]) 
+    @test vf[2:end] ≈ [12.5,4.5,0.5]
 
     @test meanfinite(A, dims=2) ≈ reshape([2, 5], 2, 1)
     @test varfinite(A, dims=2) ≈ reshape([1, 1], 2, 1)
