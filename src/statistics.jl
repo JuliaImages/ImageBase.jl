@@ -26,23 +26,38 @@ The supported `kwargs` are those of `maximum(f, A; kwargs...)`.
 maxabsfinite(A; kwargs...) = mapreduce(IfElse(isfinite, abs, typemin), maxc, A; kwargs...)
 
 """
-    meanfinite(A; kwargs...)
+    sumfinite([f=identity], A; kwargs...)
 
-Compute the mean value of `A`, ignoring any non-finite values.
+Compute `sum(f, A)` while ignoring any non-finite values.
 
 The supported `kwargs` are those of `sum(f, A; kwargs...)`.
 """
-function meanfinite end
+sumfinite(A; kwargs...) = sumfinite(identity, A; kwargs...)
 
 if Base.VERSION >= v"1.1"
-    function meanfinite(A; kwargs...)
-        s = sum(IfElse(isfinite, identity, zero), A; kwargs...)
+    sumfinite(f, A; kwargs...) = sum(IfElse(isfinite, f, zero), A; kwargs...)
+else
+    sumfinite(f, A; kwargs...) = sum(IfElse(isfinite, f, zero).(A); kwargs...)
+end
+
+"""
+    meanfinite([f=identity], A; kwargs...)
+
+Compute `mean(f, A)` while ignoring any non-finite values.
+
+The supported `kwargs` are those of `sum(f, A; kwargs...)`.
+"""
+meanfinite(A; kwargs...) = meanfinite(identity, A; kwargs...)
+
+if Base.VERSION >= v"1.1"
+    function meanfinite(f, A; kwargs...)
+        s = sumfinite(f, A; kwargs...)
         n = sum(IfElse(isfinite, x->true, x->false), A; kwargs...)   # TODO: replace with `Returns`
         return s./n
     end
 else
-    function meanfinite(A; kwargs...)
-        s = sum(IfElse(isfinite, identity, zero).(A); kwargs...)
+    function meanfinite(f, A; kwargs...)
+        s = sumfinite(f, A; kwargs...)
         n = sum(IfElse(isfinite, x->true, x->false).(A); kwargs...)
         return s./n
     end
@@ -61,14 +76,14 @@ if Base.VERSION >= v"1.1"
     function varfinite(A; kwargs...)
         m = meanfinite(A; kwargs...)
         n = sum(IfElse(isfinite, x->true, x->false), A; kwargs...)   # TODO: replace with `Returns`
-        s = sum(IfElse(isfinite, identity, zero), (A .- m).^2; kwargs...)
+        s = sum(IfElse(isfinite, identity, zero), abs2.(A .- m); kwargs...)
         return s ./ max.(0, (n .- 1))
     end
 else
     function varfinite(A; kwargs...)
         m = meanfinite(A; kwargs...)
         n = sum(IfElse(isfinite, x->true, x->false).(A); kwargs...)
-        s = sum(IfElse(isfinite, identity, zero).((A .- m).^2); kwargs...)
+        s = sum(IfElse(isfinite, identity, zero).(abs2.(A .- m)); kwargs...)
         return s ./ max.(0, (n .- 1))
     end
 end

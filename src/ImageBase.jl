@@ -15,8 +15,13 @@ export
     maxfinite,
     maxabsfinite,
     meanfinite,
-    varfinite
+    varfinite,
 
+    sumfinite
+
+# Introduced in ColorVectorSpace v0.9.3
+# https://github.com/JuliaGraphics/ColorVectorSpace.jl/pull/172
+using ImageCore.ColorVectorSpace.Future: abs2
 
 using Reexport
 
