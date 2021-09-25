@@ -8,58 +8,56 @@ using ColorVectorSpace: varmult
     _abs(x::Colorant) = mapreducec(abs, +, 0, x)
 
     @testset "sumfinite, meanfinite, varfinite" begin
-        for T in (N0f8, Float32)
-            for CT in (T, Gray{T}, RGB{T})
-                A = rand(CT, 5, 5)
-                s12 = sum(A, dims=(1,2))
-                @test eltype(s12) <: Union{CT, float(CT), float64(CT)}
+        for T in generate_test_types([N0f8, Float32], [Gray, RGB])
+            A = rand(T, 5, 5)
+            s12 = sum(A, dims=(1,2))
+            @test eltype(s12) <: Union{T, float(T), float64(T)}
 
-                @test sumfinite(A) ≈ sum(A)
-                @test sumfinite(A, dims=1) ≈ sum(A, dims=1)
-                @test sumfinite(A, dims=(1, 2)) ≈ sum(A, dims=(1, 2))
+            @test sumfinite(A) ≈ sum(A)
+            @test sumfinite(A, dims=1) ≈ sum(A, dims=1)
+            @test sumfinite(A, dims=(1, 2)) ≈ sum(A, dims=(1, 2))
 
-                @test meanfinite(A) ≈ mean(A)
-                @test meanfinite(A, dims=1) ≈ mean(A, dims=1)
-                @test meanfinite(A, dims=(1, 2)) ≈ mean(A, dims=(1, 2))
+            @test meanfinite(A) ≈ mean(A)
+            @test meanfinite(A, dims=1) ≈ mean(A, dims=1)
+            @test meanfinite(A, dims=(1, 2)) ≈ mean(A, dims=(1, 2))
 
-                @test varfinite(A) ≈ varmult(⋅, A)
-                @test varfinite(A, dims=1) ≈ varmult(⋅, A, dims=1)
-                @test varfinite(A, dims=(1, 2)) ≈ varmult(⋅, A, dims=(1, 2))
+            @test varfinite(A) ≈ varmult(⋅, A)
+            @test varfinite(A, dims=1) ≈ varmult(⋅, A, dims=1)
+            @test varfinite(A, dims=(1, 2)) ≈ varmult(⋅, A, dims=(1, 2))
 
-                # test NaN/Inf
-                if !(T <: N0f8)
-                    A = rand(CT, 5, 5) .- 0.5 .* oneunit(CT)
-                    A[1] = Inf
-                    @test sum(A) ≈ A[1]
-                    @test sum(abs, A) ≈ A[1]
-                    @test sumfinite(A) ≈ sum(A[2:end])
-                    @test sumfinite(abs, A) ≈ sum(abs, A[2:end])
-                    A[1] = NaN
-                    @test isnan(sum(A))
-                    @test isnan(sum(abs, A))
-                    @test sumfinite(A) ≈ sum(A[2:end])
-                    @test sumfinite(abs, A) ≈ sum(abs, A[2:end])
+            # test NaN/Inf
+            if eltype(T) != N0f8
+                A = rand(T, 5, 5) .- 0.5 .* oneunit(T)
+                A[1] = Inf
+                @test sum(A) ≈ A[1]
+                @test sum(abs, A) ≈ A[1]
+                @test sumfinite(A) ≈ sum(A[2:end])
+                @test sumfinite(abs, A) ≈ sum(abs, A[2:end])
+                A[1] = NaN
+                @test isnan(sum(A))
+                @test isnan(sum(abs, A))
+                @test sumfinite(A) ≈ sum(A[2:end])
+                @test sumfinite(abs, A) ≈ sum(abs, A[2:end])
 
-                    A = rand(CT, 5, 5) .- 0.5 .* oneunit(CT)
-                    A[1] = Inf
-                    @test mean(A) ≈ A[1]
-                    @test mean(abs, A) ≈ A[1]
-                    @test meanfinite(A) ≈ mean(A[2:end])
-                    @test meanfinite(abs, A) ≈ mean(abs, A[2:end])
-                    A[1] = NaN
-                    @test isnan(mean(A))
-                    @test isnan(mean(abs, A))
-                    @test meanfinite(A) ≈ mean(A[2:end])
-                    @test meanfinite(abs, A) ≈ mean(abs, A[2:end])
+                A = rand(T, 5, 5) .- 0.5 .* oneunit(T)
+                A[1] = Inf
+                @test mean(A) ≈ A[1]
+                @test mean(abs, A) ≈ A[1]
+                @test meanfinite(A) ≈ mean(A[2:end])
+                @test meanfinite(abs, A) ≈ mean(abs, A[2:end])
+                A[1] = NaN
+                @test isnan(mean(A))
+                @test isnan(mean(abs, A))
+                @test meanfinite(A) ≈ mean(A[2:end])
+                @test meanfinite(abs, A) ≈ mean(abs, A[2:end])
 
-                    A = rand(CT, 5, 5)
-                    A[1] = Inf
-                    @test isnan(varmult(⋅, A))
-                    @test varfinite(A) ≈ varmult(⋅, A[2:end])
-                    A[1] = NaN
-                    @test isnan(varmult(⋅, A))
-                    @test varfinite(A) ≈ varmult(⋅, A[2:end])
-                end
+                A = rand(T, 5, 5)
+                A[1] = Inf
+                @test isnan(varmult(⋅, A))
+                @test varfinite(A) ≈ varmult(⋅, A[2:end])
+                A[1] = NaN
+                @test isnan(varmult(⋅, A))
+                @test varfinite(A) ≈ varmult(⋅, A[2:end])
             end
         end
 
