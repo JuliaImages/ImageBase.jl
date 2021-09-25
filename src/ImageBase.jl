@@ -11,12 +11,10 @@ export
     fdiff!,
 
     # basic image statistics, from Images.jl
-    minfinite,
-    maxfinite,
-    maxabsfinite,
+    minimum_finite,
+    maximum_finite,
     meanfinite,
     varfinite,
-
     sumfinite
 
 # Introduced in ColorVectorSpace v0.9.3
