@@ -1,4 +1,5 @@
 using ImageBase, OffsetArrays, StackViews
+using ImageFiltering
 using Test, TestImages, Aqua, Documenter
 
 using OffsetArrays: IdentityUnitRange

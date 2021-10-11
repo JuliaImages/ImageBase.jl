@@ -9,6 +9,9 @@ export
     # originally from Images.jl
     fdiff,
     fdiff!,
+    fdiv,
+    fdiv!,
+    DiffView,
 
     # basic image statistics, from Images.jl
     minimum_finite,
