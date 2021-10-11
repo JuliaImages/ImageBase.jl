@@ -2,6 +2,7 @@ using ImageBase, OffsetArrays, StackViews
 using Test, TestImages, Aqua, Documenter
 
 using OffsetArrays: IdentityUnitRange
+include("testutils.jl")
 
 @testset "ImageBase.jl" begin
 

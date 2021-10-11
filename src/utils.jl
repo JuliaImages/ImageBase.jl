@@ -13,7 +13,14 @@ struct IfElse{C,F1,F2}
 end
 (m::IfElse)(x) = m.condition(x) ? m.f1(x) : m.f2(x)
 
+# channelwise min/max
 minc(x, y) = min(x, y)
 minc(x::Color, y::Color) = mapc(min, x, y)
 maxc(x, y) = max(x, y)
 maxc(x::Color, y::Color) = mapc(max, x, y)
+
+for (f1, f2) in ((:minc, :min), (:maxc, :max))
+    @eval function Base.reducedim_init(f, ::typeof($f1), A::AbstractArray, region)
+        Base.reducedim_init(f, $f2, A, region)
+    end
+end
