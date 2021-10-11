@@ -83,6 +83,15 @@ using Test
 
         @test meanfinite(A, dims=(1,2)) ≈ [3.5]
         @test varfinite(A, dims=(1,2)) ≈ [3.5]
+
+        # Ensure we're consistant with our decision to `abs2` in ColorVectorSpace
+        # See also: https://github.com/JuliaGraphics/ColorVectorSpace.jl/blob/master/README.md#abs-and-abs2
+        A = rand(Gray, 4, 4)
+        @test varfinite(A) ≈ varfinite(RGB.(A))
+        A[1] = Inf
+        @test varfinite(A) ≈ varfinite(RGB.(A))
+        A[1] = NaN
+        @test varfinite(A) ≈ varfinite(RGB.(A))
     end
 
     @testset "minfinite, maxfinite, maxabsfinite" begin
