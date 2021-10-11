@@ -23,8 +23,4 @@ for (f1, f2) in ((:minc, :min), (:maxc, :max))
     @eval function Base.reducedim_init(f, ::typeof($f1), A::AbstractArray, region)
         Base.reducedim_init(f, $f2, A, region)
     end
-    @eval function Base.reducedim_init(f, ::typeof($f1), A::AbstractArray{CT}, region) where CT<:Color3
-        v = Base.reducedim_init(f, $f2, reinterpret(eltype(CT), A), region)
-        colorview(base_color_type(CT){eltype(CT)}, v, v, v)
-    end
 end
