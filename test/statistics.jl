@@ -1,8 +1,7 @@
 using ImageBase
+using ImageBase: varmult
 using Statistics
 using Test
-
-using ColorVectorSpace: varmult
 
 @testset "Reductions" begin
     _abs(x::Colorant) = mapreducec(abs, +, 0, x)
