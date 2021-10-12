@@ -26,6 +26,7 @@ using Reexport
 using Base.Cartesian: @nloops
 @reexport using ImageCore
 using ImageCore.OffsetArrays
+using ImageCore.MappedArrays: of_eltype
 
 include("diff.jl")
 include("restrict.jl")

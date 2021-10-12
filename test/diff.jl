@@ -1,4 +1,9 @@
 @testset "fdiff" begin
+    # Base.diff doesn't promote integer to float
+    @test ImageBase.maybe_floattype(Int) == Int
+    @test ImageBase.maybe_floattype(N0f8) == Float32
+    @test ImageBase.maybe_floattype(RGB{N0f8}) == RGB{Float32}
+
     @testset "API" begin
         # fdiff! works the same as fdiff
         mat_in = rand(3, 3, 3)
@@ -71,7 +76,7 @@
                 sz = ntuple(_->5, N)
                 A = rand(sz...)
                 A_out = similar(A)
-                
+
                 for dims = 1:N
                     out_base = diff(A; dims=dims)
                     out = fdiff(A; dims=dims)
@@ -95,5 +100,10 @@
         A_out = fdiff(A, dims=1, rev=true)
         @test axes(A_out) == (0:2, 0:2)
         @test A_out.parent == fdiff(parent(A), dims=1, rev=true)
+    end
+
+    @testset "FixedPoint" begin
+        A = rand(N0f8, 6, 6)
+        @test fdiff(A, dims=1) == fdiff(float.(A), dims=1)
     end
 end

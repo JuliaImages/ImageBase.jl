@@ -53,7 +53,7 @@ julia> fdiff(A, dims=2, boundary=:zero) # fill boundary with zeros
 
 See also [`fdiff!`](@ref) for the in-place version.
 """
-fdiff(A::AbstractArray; kwargs...) = fdiff!(similar(A), A; kwargs...)
+fdiff(A::AbstractArray; kwargs...) = fdiff!(similar(A, maybe_floattype(eltype(A))), A; kwargs...)
 
 """
     fdiff!(dst::AbstractArray, src::AbstractArray; dims::Int, rev=false, boundary=:periodic)
@@ -69,6 +69,7 @@ function fdiff!(dst::AbstractArray, src::AbstractArray;
     N = ndims(src)
     1 <= dims <= N || throw(ArgumentError("dimension $dims out of range (1:$N)"))
 
+    src = of_eltype(maybe_floattype(eltype(dst)), src)
     r = axes(src)
     r0 = ntuple(i -> i == dims ? UnitRange(first(r[i]), last(r[i]) - 1) : UnitRange(r[i]), N)
     r1 = ntuple(i -> i == dims ? UnitRange(first(r[i])+1, last(r[i])) : UnitRange(r[i]), N)
@@ -101,3 +102,7 @@ end
 
 _fdiff_default_dims(A) = nothing
 _fdiff_default_dims(A::AbstractVector) = 1
+
+maybe_floattype(::Type{T}) where T = T
+maybe_floattype(::Type{T}) where T<:FixedPoint = floattype(T)
+maybe_floattype(::Type{CT}) where CT<:Color = base_color_type(CT){maybe_floattype(eltype(CT))}
