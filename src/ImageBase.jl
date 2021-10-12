@@ -11,6 +11,8 @@ export
     fdiff!,
     fdiv,
     fdiv!,
+    flaplacian,
+    flaplacian!,
     DiffView,
 
     # basic image statistics, from Images.jl

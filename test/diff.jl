@@ -109,46 +109,39 @@
 end
 
 @testset "DiffView" begin
-    A = rand(6)
-    @test DiffView(A) ===
-        DiffView(A, Val(false), ImageBase.Periodic()) ===
-        DiffView(A, ImageBase.Periodic(), Val(false)) ===
-        @test_logs((:warn, "Please use `Val(false)` for performance"), DiffView(A, false))
-
     for T in generate_test_types([N0f8, Float32], [Gray, RGB])
         A = rand(T, 6)
-        Av = DiffView(A)
-        @test Av == DiffView(A, ImageBase.Periodic(), Val(false))
+        Av = DiffView(A, Val(1))
+        @test Av == DiffView(A, Val(1), ImageBase.Periodic(), Val(false))
         @test eltype(Av) == floattype(T)
         @test axes(Av) == axes(A)
         @test Av == fdiff(A)
-        @test DiffView(A, Val(true)) == fdiff(A; rev=true)
-        @test DiffView(A, ImageBase.ZeroFill()) == fdiff(A; boundary=:zero)
-        @test DiffView(A, ImageBase.ZeroFill(), Val(true)) == fdiff(A; boundary=:zero, rev=true)
+        @test DiffView(A, Val(1), ImageBase.Periodic(), Val(true)) == fdiff(A; rev=true)
+        @test DiffView(A, Val(1), ImageBase.ZeroFill()) == fdiff(A; boundary=:zero)
+        @test DiffView(A, Val(1), ImageBase.ZeroFill(), Val(true)) == fdiff(A; boundary=:zero, rev=true)
 
         A = rand(T, 6, 6)
-        Av = DiffView(A, dims=1)
+        Av = DiffView(A, Val(1))
         @test eltype(Av) == floattype(T)
         @test axes(Av) == axes(A)
         @test Av == fdiff(A, dims=1)
-        @test DiffView(A, Val(true), dims=1) == fdiff(A; dims=1, rev=true)
-        @test DiffView(A, ImageBase.ZeroFill(), dims=1) == fdiff(A; boundary=:zero, dims=1)
-        @test DiffView(A, ImageBase.ZeroFill(), Val(true), dims=1) == fdiff(A; boundary=:zero, rev=true, dims=1)
+        @test DiffView(A, Val(1), ImageBase.Periodic(), Val(true)) == fdiff(A; dims=1, rev=true)
+        @test DiffView(A, Val(1), ImageBase.ZeroFill()) == fdiff(A; boundary=:zero, dims=1)
+        @test DiffView(A, Val(1), ImageBase.ZeroFill(), Val(true)) == fdiff(A; boundary=:zero, rev=true, dims=1)
     end
 
     A = OffsetArray(rand(6, 6), -1, -1)
-    Av = DiffView(A, dims=1)
+    Av = DiffView(A, Val(1))
     @test axes(Av) == axes(A)
     @test Av == fdiff(A, dims=1)
 end
 
-@testset "fdiv" begin
-    laplacian(X) = fdiv(ntuple(i->DiffView(X, dims=i), ndims(X))...)
+@testset "fdiv/flaplacian" begin
     ref_laplacian(X) = imfilter(X, Kernel.Laplacian(ntuple(x->true, ndims(X))), "circular")
     for T in generate_test_types([N0f8, Float32], [Gray, RGB])
         for sz in [(7,), (7, 7), (7, 7, 7)]
             A = rand(T, sz...)
-            @test laplacian(A) ≈ ref_laplacian(A)
+            @test flaplacian(A) ≈ ref_laplacian(A)
         end
     end
 end
