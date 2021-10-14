@@ -1,6 +1,8 @@
 using ImageBase, OffsetArrays, StackViews
 using ImageFiltering
+using ImageQualityIndexes
 using Test, TestImages, Aqua, Documenter
+using Random
 
 using OffsetArrays: IdentityUnitRange
 include("testutils.jl")
@@ -24,6 +26,7 @@ include("testutils.jl")
     include("diff.jl")
     include("restrict.jl")
     include("statistics.jl")
+    include("models.jl")
 
     @info "deprecations are expected"
     include("deprecated.jl")

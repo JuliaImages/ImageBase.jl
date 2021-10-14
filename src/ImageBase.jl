@@ -26,6 +26,9 @@ include("diff.jl")
 include("restrict.jl")
 include("utils.jl")
 include("statistics.jl")
+
+include("models.jl")
+
 include("deprecated.jl")
 
 if VERSION >= v"1.4.2" # work around https://github.com/JuliaLang/julia/issues/34121
