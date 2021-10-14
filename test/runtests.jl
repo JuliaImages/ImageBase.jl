@@ -1,11 +1,11 @@
 using ImageBase, OffsetArrays, StackViews
+using ImageFiltering
 using Test, TestImages, Aqua, Documenter
 
 using OffsetArrays: IdentityUnitRange
 include("testutils.jl")
 
 @testset "ImageBase.jl" begin
-
     @testset "Project meta quality checks" begin
         # Not checking compat section for test-only dependencies
         Aqua.test_ambiguities(ImageBase)
@@ -17,7 +17,7 @@ include("testutils.jl")
             project_toml_formatting=true
         )
         if VERSION >= v"1.2"
-            doctest(ImageBase,manual = false)
+            doctest(ImageBase, manual = false)
         end
     end
 

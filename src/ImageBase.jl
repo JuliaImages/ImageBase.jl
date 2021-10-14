@@ -5,11 +5,6 @@ export
     # originally from ImageTransformations.jl
     restrict,
 
-    # finite difference on one-dimension
-    # originally from Images.jl
-    fdiff,
-    fdiff!,
-
     # basic image statistics, from Images.jl
     minimum_finite,
     maximum_finite,
@@ -26,13 +21,11 @@ using Reexport
 using Base.Cartesian: @nloops
 @reexport using ImageCore
 using ImageCore.OffsetArrays
-using ImageCore.MappedArrays: of_eltype
 
 include("diff.jl")
 include("restrict.jl")
 include("utils.jl")
 include("statistics.jl")
-include("compat.jl")
 include("deprecated.jl")
 
 if VERSION >= v"1.4.2" # work around https://github.com/JuliaLang/julia/issues/34121
