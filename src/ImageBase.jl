@@ -10,6 +10,7 @@ export
     maximum_finite,
     meanfinite,
     varfinite,
+    varmult_finite,
     sumfinite
 
 # Introduced in ColorVectorSpace v0.9.3

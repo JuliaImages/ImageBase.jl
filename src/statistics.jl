@@ -75,7 +75,7 @@ end
 
 Compute the variance of `A`, ignoring any non-finite values.
 
-The supported `kwargs` are those of `sum(f, A; kwargs...)`.
+The supported `kwargs` are those of `Statistics.var(A; kwargs...)`.
 
 !!! note
     This function can produce a seemingly suprising result if the input array is an RGB
@@ -83,21 +83,63 @@ The supported `kwargs` are those of `sum(f, A; kwargs...)`.
     `varfinite(img) ≈ varfinite(RGB.(img))` holds for any gray-scale image. See also
     https://github.com/JuliaGraphics/ColorVectorSpace.jl#abs-and-abs2 for more information.
 
+See also [`varmult_finite(op, A)`](@ref) for custom multiplication behavior when element of
+A is a vector-like object, e.g., `RGB`.
 """
-function varfinite end
+@inline varfinite(A; kwargs...) = varmult_finite(⋅, A; kwargs...)
 
-if Base.VERSION >= v"1.1"
-    function varfinite(A; kwargs...)
-        m = meanfinite(A; kwargs...)
-        n = sum(IfElse(isfinite, x->true, x->false), A; kwargs...)   # TODO: replace with `Returns`
-        s = sum(IfElse(isfinite, identity, zero), abs2.(A .- m); kwargs...)
-        return s ./ max.(0, (n .- 1))
+"""
+    varmult_finite(op, itr; corrected::Bool=true, mean=Statistics.mean(itr), dims=:)
+
+Compute the variance of elements of `itr`, using `op` as the multiplication operator.
+Unlike [`varmult`](@ref), non-finite values are ignored.
+"""
+@inline function varmult_finite(op, A; corrected::Bool=true, dims=:, mean=meanfinite(A; dims=dims))
+    # modified from ColorVectorSpace
+    if dims === (:)
+        _varmult_finite(op, A, mean, corrected)
+    else
+        _varmult_finite(op, A, mean, corrected, dims)
     end
+end
+function _varmult_finite(op, A, mean, corrected::Bool)
+    map_op = IfElse(isfinite,
+        c->(Δc = c-mean; op(Δc, Δc)),
+        i->zero(_number_type(typeof(i)))
+    )
+    # TODO(johnnychen94): calculate v and n in one for-loop for better performance
+    init = zero(maybe_floattype(_number_type(eltype(A))))
+    v = mapreduce(map_op, +, A; init=init)
+    n = count_finite(A)
+    if n == 0 || n == 1
+        return zero(v) / zero(n) # a type-stable NaN
+    else
+        return v / (corrected ? max(1, n-1) : max(1, n))
+    end
+end
+function _varmult_finite(op, A, mean, corrected::Bool, dims)
+    # TODO: avoid temporary creation
+    map_op = IfElse(isfinite,
+        Δc->op(Δc, Δc),
+        i->zero(_number_type(eltype(A)))
+    )
+    # TODO(johnnychen94): calculate v and n in one for-loop for better performance
+    init = zero(maybe_floattype(_number_type(eltype(A))))
+    v = mapreduce(map_op, +, A .- mean; dims=dims, init=init)
+    n = count_finite(A; dims=dims)
+    map(v, n) do vᵢ, nᵢ
+        if nᵢ == 0 || nᵢ == 1
+            return zero(vᵢ) / zero(nᵢ) # a type-stable NaN
+        else
+            return vᵢ / (corrected ? max(1, nᵢ-1) : max(1, nᵢ))
+        end
+    end
+end
+_number_type(::Type{T}) where T = T
+_number_type(::Type{CT}) where CT<:Color = eltype(CT)
+
+if VERSION >= v"1.1"
+    count_finite(A; kwargs...) = sum(IfElse(isfinite, x->true, x->false), A; kwargs...)
 else
-    function varfinite(A; kwargs...)
-        m = meanfinite(A; kwargs...)
-        n = sum(IfElse(isfinite, x->true, x->false).(A); kwargs...)
-        s = sum(IfElse(isfinite, identity, zero).(abs2.(A .- m)); kwargs...)
-        return s ./ max.(0, (n .- 1))
-    end
+    count_finite(A; kwargs...) = sum(IfElse(isfinite, identity, zero).(abs2.(A .- m)); kwargs...)
 end
