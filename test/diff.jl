@@ -1,8 +1,12 @@
+using ImageBase.FiniteDiff
+# TODO(johnnychen94): remove this after we delete `Imagebase.fdiff` and `ImageBase.fdiff!` entrypoints
+using ImageBase.FiniteDiff: fdiff, fdiff!
+
 @testset "fdiff" begin
     # Base.diff doesn't promote integer to float
-    @test ImageBase.maybe_floattype(Int) == Int
-    @test ImageBase.maybe_floattype(N0f8) == Float32
-    @test ImageBase.maybe_floattype(RGB{N0f8}) == RGB{Float32}
+    @test ImageBase.FiniteDiff.maybe_floattype(Int) == Int
+    @test ImageBase.FiniteDiff.maybe_floattype(N0f8) == Float32
+    @test ImageBase.FiniteDiff.maybe_floattype(RGB{N0f8}) == RGB{Float32}
 
     @testset "API" begin
         # fdiff! works the same as fdiff
@@ -105,5 +109,79 @@
     @testset "FixedPoint" begin
         A = rand(N0f8, 6, 6)
         @test fdiff(A, dims=1) == fdiff(float.(A), dims=1)
+    end
+end
+
+@testset "fgradient" begin
+    for T in generate_test_types([N0f8, Float32], [Gray, RGB])
+        for sz in [(7, ), (7, 5), (7, 5, 3)]
+            A = rand(T, sz...)
+
+            ∇A = fgradient(A)
+            for i in 1:length(sz)
+                @test ∇A[i] == fdiff(A, dims=i)
+            end
+            ∇A = map(similar, ∇A)
+            @test fgradient!(∇A, A) == fgradient(A)
+
+            ∇tA = fgradient(A, adjoint=true)
+            for i in 1:length(sz)
+                @test ∇tA[i] == .-fdiff(A, dims=i, rev=true)
+            end
+            ∇tA = map(similar, ∇tA)
+            @test fgradient!(∇tA, A, adjoint=true) == fgradient(A, adjoint=true)
+        end
+    end
+end
+
+@testset "fdiv/flaplacian" begin
+    ref_laplacian(X) = imfilter(X, Kernel.Laplacian(ntuple(x->true, ndims(X))), "circular")
+
+    X = [
+        5  3  8  1  2  2  3
+        5  5  1  3  3  1  1
+        1  8  2  9  1  2  7
+        7  3  4  5  8  1  5
+        1  4  1  8  8  9  7
+    ]
+    ΔX_ref = [
+        -8   10  -26   17    6    7    3
+        -8   -3   14    2   -5    4   12
+        23  -21   14  -25   18    2  -19
+       -18   11   -5    9  -17   20    2
+        19   -8   20  -17   -5  -18  -10
+    ]
+    ΔX = ref_laplacian(X)
+    # Base.diff doesn't promote Int to floats so we should probably do the same for laplacian
+    @test eltype(ΔX) == Int
+    @test ΔX_ref == ΔX
+
+    for T in generate_test_types([N0f8, Float32], [Gray, RGB])
+        for sz in [(7,), (7, 7), (7, 7, 7)]
+            A = rand(T, sz...)
+            ∇A = fgradient(A)
+            out = fdiv(∇A)
+            @test out ≈ ref_laplacian(A)
+
+            fill!(out, zero(T))
+            fdiv!(out, ∇A...)
+            @test out == fdiv(∇A)
+        end
+    end
+
+    for T in generate_test_types([N0f8, Float32], [Gray, RGB])
+        for sz in [(7,), (7, 7), (7, 7, 7)]
+            A = rand(T, sz...)
+            out = flaplacian(A)
+            @test out ≈ ref_laplacian(A)
+
+            ∇A = fgradient(A)
+            foreach((out, ∇A...)) do x
+                fill!(x, zero(T))
+            end
+            flaplacian!(out, ∇A, A)
+            @test out == flaplacian(A)
+            @test ∇A == fgradient(A)
+        end
     end
 end

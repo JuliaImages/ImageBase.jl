@@ -14,4 +14,11 @@
         @test maxabsfinite(A) == maximum_finite(abs, A)
         @test maxabsfinite(A, dims=1) == maximum_finite(abs, A, dims=1)
     end
+
+    @testset "fdiff entrypoints" begin
+        A = rand(Float32, 5)
+        @test ImageBase.fdiff(A, rev=true) == ImageBase.FiniteDiff.fdiff(A, rev=true)
+        out = similar(A)
+        @test ImageBase.fdiff!(out, A, rev=false) == ImageBase.FiniteDiff.fdiff!(out, A, rev=false)
+    end
 end
