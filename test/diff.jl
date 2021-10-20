@@ -121,15 +121,25 @@ end
             for i in 1:length(sz)
                 @test ∇A[i] == fdiff(A, dims=i)
             end
+            ∇A = fgradient(A; boundary=:zero)
+            for i in 1:length(sz)
+                @test ∇A[i] == fdiff(A, dims=i, boundary=:zero)
+            end
             ∇A = map(similar, ∇A)
             @test fgradient!(∇A, A) == fgradient(A)
+            @test fgradient!(∇A, A; boundary=:zero) == fgradient(A; boundary=:zero)
 
             ∇tA = fgradient(A, adjoint=true)
             for i in 1:length(sz)
                 @test ∇tA[i] == .-fdiff(A, dims=i, rev=true)
             end
+            ∇tA = fgradient(A, adjoint=true, boundary=:zero)
+            for i in 1:length(sz)
+                @test ∇tA[i] == .-fdiff(A, dims=i, rev=true, boundary=:zero)
+            end
             ∇tA = map(similar, ∇tA)
             @test fgradient!(∇tA, A, adjoint=true) == fgradient(A, adjoint=true)
+            @test fgradient!(∇tA, A, adjoint=true, boundary=:zero) == fgradient(A, adjoint=true, boundary=:zero)
         end
     end
 end

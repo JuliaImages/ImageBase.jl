@@ -197,42 +197,44 @@ flaplacian!(out, ∇X::Tuple, X::AbstractArray) = fdiv!(out, fgradient!(∇X, X)
 
 
 """
-    fgradient(X::AbstractArray; adjoint=false) -> (∂₁X, ∂₂X, ..., ∂ₙX)
+    fgradient(X::AbstractArray; adjoint=false, boundary=:periodic) -> (∂₁X, ∂₂X, ..., ∂ₙX)
 
 Computes the gradient fields of `X`. If `adjoint==true` then it computes the adjoint gradient
 fields.
 
 Each gradient vector is computed as forward difference along specific dimension, e.g.,
-[`∂ᵢX = fdiff(X, dims=i)`](@ref fdiff).
+[`∂ᵢX = fdiff(X, dims=i)`](@ref fdiff). The `boundary` keyword is passed to `fdiff` to
+specify the behavior on boundary.
 
-Mathematically, the adjoint operator ∂ᵢ' of ∂ᵢ is defined as `<∂ᵢu, v> := <u, ∂ᵢ'v>`.
+Mathematically, the adjoint operator ∂ᵢ' of ∂ᵢ is defined as `<∂ᵢu, v> := <u, ∂ᵢ'v>`, where
+`<a, b>` is the inner product of vector `a` and `b`.
 
 See also the in-place version [`fgradient!(X)`](@ref) to reuse the allocated memory.
 """
-function fgradient(X::AbstractArray{T,N}; adjoint::Bool=false) where {T,N}
-    fgradient!(ntuple(i->similar(X, maybe_floattype(T)), N), X; adjoint=adjoint)
+function fgradient(X::AbstractArray{T,N}; adjoint::Bool=false, boundary=:periodic) where {T,N}
+    fgradient!(ntuple(i->similar(X, maybe_floattype(T)), N), X; adjoint=adjoint, boundary=boundary)
 end
 
 """
-    fgradient!(∇X::Tuple, X::AbstractArray; adjoint=false)
+    fgradient!(∇X::Tuple, X::AbstractArray; adjoint=false, boundary=:periodic)
 
 The in-place version of (adjoint) gradient operator [`fgradient`](@ref).
 
 The input `∇X = (∂₁X, ∂₂X, ..., ∂ₙX)` is a tuple of arrays that are similar to `X`, i.e.,
 `eltype(∂ᵢX) == eltype(X)` and `axes(∂ᵢX)  == axes(X)` for all `i`.
 """
-function fgradient!(∇X::NTuple{N, <:AbstractArray}, X; adjoint::Bool=false) where N
+function fgradient!(∇X::NTuple{N, <:AbstractArray}, X; adjoint::Bool=false, boundary=:periodic) where N
     all(v->axes(v) == axes(X), ∇X) || throw(ArgumentError("All axes of vector fields ∇X and X should be the same."))
     for i in 1:N
         if adjoint
             # the negative adjoint of gradient operator for forward difference is the backward difference
             # see also
             # Getreuer, Pascal. "Rudin-Osher-Fatemi total variation denoising using split Bregman." _Image Processing On Line_ 2 (2012): 74-95.
-            fdiff!(∇X[i], X, dims=i, rev=true)
+            fdiff!(∇X[i], X, dims=i, rev=true, boundary=boundary)
             # TODO(johnnychen94): ideally we can get avoid flipping the signs for better performance.
             @. ∇X[i] = -∇X[i]
         else
-            fdiff!(∇X[i], X, dims=i)
+            fdiff!(∇X[i], X, dims=i, boundary=boundary)
         end
     end
     return ∇X
