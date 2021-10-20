@@ -89,7 +89,7 @@ fdiff(A::AbstractArray; kwargs...) = fdiff!(similar(A, maybe_floattype(eltype(A)
 """
     fdiff!(dst::AbstractArray, src::AbstractArray; dims::Int, rev=false, boundary=:periodic)
 
-The in-place version of [`ImageBase.fdiff`](@ref)
+The in-place version of [`fdiff`](@ref)
 """
 function fdiff!(dst::AbstractArray, src::AbstractArray;
         dims=_fdiff_default_dims(src),
