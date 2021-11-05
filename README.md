@@ -17,4 +17,5 @@ Check the [reference page](https://juliaimages.org/ImageCore.jl/stable/reference
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://JuliaImages.github.io/ImageBase.jl/stable
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]: https://JuliaImages.github.io/ImageBase.jl/latest
+[docs-dev-url]: https://JuliaImages.github.io/ImageBase.jl/dev
+
