@@ -135,6 +135,7 @@ _fdiff_default_dims(A) = nothing
 _fdiff_default_dims(A::AbstractVector) = 1
 
 maybe_floattype(::Type{T}) where T = T
+maybe_floattype(::Type{Bool}) = floattype(Bool)
 maybe_floattype(::Type{T}) where T<:FixedPoint = floattype(T)
 maybe_floattype(::Type{CT}) where CT<:Color = base_color_type(CT){maybe_floattype(eltype(CT))}
 
