@@ -67,14 +67,14 @@ See also `ImageTransformations.imresize`.
 # Example
 
 ```julia
-a_course = [0, 1, 0.3]
+a_coarse = [0, 1, 0.3]
 ```
 If we were to interpolate this at the halfway points, we'd get
 ```julia
 a_fine = [0, 0.5, 1, 0.65, 0.3]
 ```
-Note that `a_fine` is obtained from `a_course` via the *prolongation* operator `P` as
-`P*a_course`, where
+Note that `a_fine` is obtained from `a_coarse` via the *prolongation* operator `P` as
+`P*a_coarse`, where
 ```julia
 P = [1   0   0;      # this line "copies over" the first point
      0.5 0.5 0;      # this line takes the mean of the first and second point
