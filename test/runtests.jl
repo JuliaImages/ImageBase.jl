@@ -7,7 +7,7 @@ include("testutils.jl")
 
 @testset "ImageBase.jl" begin
     @testset "Project meta quality checks" begin
-        if VERSION >= v"1.3"
+        if Base.VERSION >= v"1.3"
             # Not checking compat section for test-only dependencies
             Aqua.test_ambiguities(ImageBase)
             Aqua.test_all(ImageBase;
@@ -25,6 +25,8 @@ include("testutils.jl")
     include("restrict.jl")
     include("statistics.jl")
 
-    @info "deprecations are expected"
-    include("deprecated.jl")
+    if Base.JLOptions().depwarn != 2
+        @info "deprecations are expected"
+        include("deprecated.jl")
+    end
 end
