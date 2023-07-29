@@ -24,3 +24,7 @@ for (f1, f2) in ((:minc, :min), (:maxc, :max))
         Base.reducedim_init(f, $f2, A, region)
     end
 end
+
+maybe_floattype(::Type{T}) where T = T
+maybe_floattype(::Type{T}) where T<:FixedPoint = floattype(T)
+maybe_floattype(::Type{CT}) where CT<:Color = base_color_type(CT){maybe_floattype(eltype(CT))}

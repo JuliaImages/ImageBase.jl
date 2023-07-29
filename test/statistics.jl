@@ -4,8 +4,6 @@ using Statistics
 using Test
 
 @testset "Reductions" begin
-    _abs(x::Colorant) = mapreducec(abs, +, 0, x)
-
     @testset "sumfinite, meanfinite, varfinite" begin
         for T in generate_test_types([N0f8, Float32], [Gray, RGB])
             A = rand(T, 5, 5)

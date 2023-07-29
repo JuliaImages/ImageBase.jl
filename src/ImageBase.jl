@@ -10,6 +10,7 @@ export
     maximum_finite,
     meanfinite,
     varfinite,
+    varmult_finite,
     sumfinite
 
 using Reexport
