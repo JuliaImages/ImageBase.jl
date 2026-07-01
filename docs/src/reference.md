@@ -12,7 +12,7 @@ restrict
 
 ```@autodocs
 Modules = [ImageBase.FiniteDiff]
-order = [:module, :function]
+Order = [:module, :function]
 ```
 
 ## Statistics
