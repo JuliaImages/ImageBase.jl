@@ -7,8 +7,18 @@ ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
+Aqua = "0.8"
+Documenter = "1"
 ImageCore = "0.10"
+ImageFiltering = "0.7"
+ImageIO = "0.6"
+ImageMagick = "1"
+OffsetArrays = "1"
 Reexport = "0.2, 1"
+StackViews = "0.1"
+Statistics = "1"
+Test = "1"
+TestImages = "1"
 julia = "1.10"
 
 [extras]
