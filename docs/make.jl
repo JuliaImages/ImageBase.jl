@@ -6,6 +6,7 @@ format = Documenter.HTML(edit_link = "master",
 makedocs(modules  = [ImageBase, ],
          format   = format,
          sitename = "ImageBase",
+         checkdocs = :exported,
          pages    = ["index.md", "reference.md"])
 
 deploydocs(repo   = "github.com/JuliaImages/ImageBase.jl.git")

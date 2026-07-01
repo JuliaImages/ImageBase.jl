@@ -99,14 +99,12 @@ using Test
             A = rand(T, 5, 5)
             @test @inferred(minimum_finite(A)) == minimum(A)
             @test @inferred(maximum_finite(A)) == maximum(A)
-            @test minimum_finite(A; dims=1) == minimum(A; dims=1)
-            @test maximum_finite(A; dims=1) == maximum(A; dims=1)
-            @test_broken @inferred maximum_finite(A; dims=1)
-            @test_broken @inferred minimum_finite(A; dims=1)
+            @test @inferred(minimum_finite(A; dims=1)) == minimum(A; dims=1)
+            @test @inferred(maximum_finite(A; dims=1)) == maximum(A; dims=1)
 
             @test maximum_finite(abs2, A) == maximum(abs2, A)
-            @test_broken @inferred maximum(abs2, A)
-            @test_broken @inferred minimum(abs2, A)
+            @test @inferred(maximum(abs2, A)) == maximum(abs2, A)
+            @test @inferred(minimum(abs2, A)) == minimum(abs2, A)
 
             if eltype(T) != N0f8
                 A = rand(T, 5, 5) .- 0.5 * rand(T, 5, 5)
